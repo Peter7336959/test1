@@ -1,0 +1,758 @@
+--- 
+title: "求職服務範例 (108~112年)"
+author: "Yellow Apple & Peter Ho"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+description: "The output format for this example is bookdown::gitbook."
+rmd_files: ["index.Rmd"]
+
+---
+
+# 研究目的
+
+>"這是將5年(108~112)**求職服務情形**進行資料收集與整理分析。主要目的有2:"
+>
+>1. 掌握就服服務資訊(由各站匯總)，如**服務能量**、**求職人員群體特性**等。
+>2. 建立**預測模式**，由求職人員個人特質來預測是否能服務就業成功。^[本資訊係於2024-04 正式收集與分析，協作人員：小玥(資料收集)、小真(概念提供)，小信(程式撰寫)，共同完成報告。]
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+
+```
+
+>"R 資料整理分析套件載入"
+```{r message=F}
+library(tidyverse)
+library(readxl)
+library(writexl)
+library(stringr)
+library(lubridate)
+library(forcats)
+library(cowplot) 
+library(ggpubr)
+library(tidyr)
+library(scales)
+library(rstatix)
+library(kableExtra)
+library(gtsummary)
+library(ggstats)
+library(kableExtra)
+
+
+```
+
+# 研究方法 
+
+## 資料來源
+>"資料來源：就服系統產出原始資料(excel格式)，按年按月分。"
+>"每月有3個檔案，經手工移置目錄中，例: F:/提供主計處資料/108年/10801求職登記報表(8)."
+>"利用R library(readxl)套件，按年按月讀取後合併"
+
+### 資料前處理（data preprocessing）
+>"載入資料"
+```{r message=F}
+load("F:/提供主計處資料/X5yraw.RData")
+原始求職人次 <- nrow(X5y)
+cat("5年求職人次(原始檔案):", 原始求職人次, "筆資料")
+
+```
+
+### 資料架構
+>"資料欄位呈現"
+```{r message=F}
+glimpse(X5y) # 資料欄位
+```
+
+## 分析工具與方法
+>"分析套件簡易說明"
+>"預測模式說明與參考網址"
+
+## 資料分析主要項目
+> 1. 服務能量
+> 2. 服務失業者比例
+> 3. 求職者特性
+> 4. 數據模式見解
+> ------ Peter Ho 
+^[這是測試檔案]
+
+# 資料清理
+```{r message=F}
+  # 日期處理
+    # 登記日期處理
+    y <- as.numeric(str_sub(X5y$登記日期, 
+                 start = 1,
+                 end=str_locate(X5y$登記日期,"年")[[1]]-1))+1911
+    m <- str_sub(X5y$登記日期, 
+                 start=str_locate(X5y$登記日期,"年")[[1]]+1,
+                 end=str_locate(X5y$登記日期,"月")[[1]]-1)
+    d <- str_sub(X5y$登記日期, 
+                 start=str_locate(X5y$登記日期,"月")[[1]]+1,
+                 end=str_locate(X5y$登記日期,"日")[[1]]-1)
+    X5y$登記日期1 <- as.Date(paste(y,m,d, sep = "-"))
+
+    #登記日期轉年月日星期
+    X5y$年 <-as.character(year(X5y$登記日期1))
+    X5y$月 <-as.character(month(X5y$登記日期1))
+    X5y$日 <-as.character(day(X5y$登記日期1))
+    X5y$星期 <-as.character(wday(X5y$登記日期1))
+    #X5y <- X5y %>% select(年,月,日,星期,everything())
+
+   # 清結日期處理
+    y <- as.numeric(str_sub(X5y$清結日期, 
+                    start = 1,
+                    end=str_locate(X5y$清結日期,"年")[[1]]-1))+1911
+    m <- str_sub(X5y$清結日期, 
+                 start=str_locate(X5y$清結日期,"年")[[1]]+1,
+                 end=str_locate(X5y$清結日期,"月")[[1]]-1)
+    d <- str_sub(X5y$清結日期, 
+                 start=str_locate(X5y$清結日期,"月")[[1]]+1,
+                 end=str_locate(X5y$清結日期,"日")[[1]]-1)
+    X5y$清結日期1 <- as.Date(paste(y,m,d, sep = "-"))
+    
+    # 登記~結清日數
+    X5y$結清日數 <- mday(days(X5y$清結日期1-X5y$登記日期1))
+    summary(X5y$結清日數)
+    hist(X5y$結清日數)
+    X5y %>% count(X5y$結清日數>60) %>% mutate(prop=n/sum(n))
+    
+    #出生日期處理
+    y <- as.numeric(str_sub(X5y$出生日期, 
+                  start = 1,
+                  end=str_locate(X5y$出生日期,"年")[[1]]-1))+1911
+    m <- str_sub(X5y$出生日期, 
+                 start=str_locate(X5y$出生日期,"年")[[1]]+1,
+                 end=str_locate(X5y$出生日期,"月")[[1]]-1)
+    d <- str_sub(X5y$出生日期, 
+                 start=str_locate(X5y$出生日期,"月")[[1]]+1,
+                 end=str_locate(X5y$出生日期,"日")[[1]]-1)
+    X5y$出生日期1 <- as.Date(paste(y,m,d, sep = "-"))
+    X5y$年齡 <- year(X5y$登記日期1)-year(X5y$出生日期1)
+    summary(X5y$年齡)
+    X5y %>%  count(年齡>75) %>% mutate(prop=n/sum(n))
+       
+    #刪除舊欄位
+    #X5y <- X5y %>% select(-出生日期,-登記日期,-清結日期)
+    
+    
+    # 前次工作時間處理
+    X5y$前次工作時間_起 <-str_split_i(X5y$前次工作時間,"~",1)
+    X5y$前次工作時間_迄 <- str_split_i(X5y$前次工作時間,"~",2)
+    #前次工作時間_起 (運算)
+    y <- str_split_i(X5y$前次工作時間_起,"年",1)
+    y[y==""] <- NA   # 用NA取代空白
+    y <- as.numeric(y)+1911 
+    t1 <- str_split_i(X5y$前次工作時間_起,"年",2)
+    m <- str_split_i(t1,"月",1)
+    t2 <- str_split_i(t1,"月",2)
+    d <- str_split_i(t2,"日",1)
+    X5y$前次工作時間_起 <- as.Date(ifelse(is.na(y),NA,paste(y,m,d, sep = "-")))
+    #前次工作時間_迄 (運算)
+    y <- str_split_i(X5y$前次工作時間_迄,"年",1)
+    y[y==""] <- NA
+    y <- as.numeric(y)+1911
+    t1 <- str_split_i(X5y$前次工作時間_迄,"年",2)
+    m <- str_split_i(t1,"月",1)
+    t2 <- str_split_i(t1,"月",2)
+    d <- str_split_i(t2,"日",1)
+    X5y$前次工作時間_迄 <- as.Date(ifelse(is.na(y),NA,paste(y,m,d, sep = "-")))
+    #前次工作年數
+    X5y$前次工作年數 <-round(mday(days(X5y$前次工作時間_迄-X5y$前次工作時間_起))/365,1)
+    summary(X5y$前次工作年數)
+    X5y %>% count(前次工作年數>25) %>% mutate(prop=n/sum(n))
+    
+    
+    #失業日數
+    X5y$失業日數 <-round(mday(days(X5y$登記日期1-X5y$前次工作時間_迄)),0)
+    X5y$失業年數 <- round(X5y$失業日數/365,2) 
+    summary(X5y$失業年數)
+    X5y %>% count(失業年數>25) %>% mutate(prop=n/sum(n))
+    
+    
+    #刪除舊欄位
+    #X5y <- X5y %>% select(-前次工作時間)
+    
+        
+    #處理行政區
+    X5y$居住行政區 <- str_sub(X5y$地址, 1, 6)
+    
+    #工作地點與居住行政區
+    #居住地點分布
+    F <- X5y %>% select(年,居住行政區) %>%
+      filter(str_detect(居住行政區, "市")|str_detect(居住行政區, "縣"))
+    
+    X5y <- X5y %>% 
+      filter(str_detect(居住行政區, "市")|str_detect(居住行政區, "縣")) %>%
+      mutate(居住市=str_sub(居住行政區,1,2)) 
+    X5y %>% group_by(居住市) %>%
+      summarise(人數=n()) %>% arrange(desc(人數)) %>%
+      mutate(prop = round(人數/sum(人數),3)) %>%
+      filter(prop>0.001)
+    
+    X5y <- X5y %>% 
+      mutate(居住區 = str_split_i(F$居住行政區,"市",2))
+    
+    X5y %>% group_by(居住區) %>%
+      summarise(人數=n()) %>% arrange(desc(人數)) %>%
+      mutate(prop = round(人數/sum(人數),3)) %>%
+      filter(prop>0.001)
+    
+    #刪除舊欄位
+    #X5y <- X5y %>% select(-地址)    
+    
+    
+    
+    #處理個案區分
+    max(str_count(X5y$個案區分, ";"), na.rm = T)
+    X5y$個案區分1 <- str_split_i(X5y$個案區分,";",1)
+    X5y$個案區分2 <- str_split_i(X5y$個案區分,";",2)
+    X5y$個案區分3 <- str_split_i(X5y$個案區分,";",3)
+    X5y$個案區分4 <- str_split_i(X5y$個案區分,";",4)
+    X5y$個案區分5 <- str_split_i(X5y$個案區分,";",5)
+    X5y$個案區分6 <- str_split_i(X5y$個案區分,";",6)
+    X5y$個案區分7 <- str_split_i(X5y$個案區分,";",7)
+    
+    X5y$身分數 <- 7-(is.na(X5y$個案區分1)+
+                     is.na(X5y$個案區分2)+
+                     is.na(X5y$個案區分3)+
+                     is.na(X5y$個案區分4)+
+                     is.na(X5y$個案區分5)+
+                     is.na(X5y$個案區分6)+
+                     is.na(X5y$個案區分7))
+    
+    
+    #刪除不用欄位
+    #X5y <- X5y %>% select(-電話,-手機,-電子信箱,-個案區分,)    
+    
+    #教育程度
+    X5y %>% count(教育程度)
+    X5y$教育程度1 <- ifelse(X5y$教育程度=="國小"|X5y$教育程度=="國中","國中小",
+                     ifelse(X5y$教育程度=="高職"|X5y$教育程度=="高中","高中職",
+                     ifelse(X5y$教育程度=="大學"|X5y$教育程度=="大專","大專學",
+                     ifelse(X5y$教育程度=="碩士"|X5y$教育程度=="博士","碩博士",
+                            "其他"))))  
+    X5y %>% count(教育程度1)
+    
+    #語言程度
+    X5y %>% count(英文語言能力)
+    X5y$英文能力1 <- ifelse(X5y$英文語言能力=="不懂","不懂",
+                     ifelse(X5y$英文語言能力=="普通"|X5y$英文語言能力=="稍懂","尚可",
+                     ifelse(X5y$英文語言能力=="精通","精通",NA)))  
+    X5y %>% count(英文能力1)
+    
+    X5y %>% count(日文語言能力)
+    X5y$日文能力1 <- ifelse(X5y$日文語言能力=="不懂","不懂",
+                        ifelse(X5y$日文語言能力=="普通"|X5y$日文語言能力=="稍懂","尚可",
+                               ifelse(X5y$英文語言能力=="精通","精通",NA)))  
+    X5y %>% count(日文能力1)
+
+    
+    #處理清結原因
+    # 原因統計
+    X5y %>% count(清結原因)
+    X5y$清結原因1 <- NA
+    X5y$清結原因1 <- ifelse (str_detect(X5y$清結原因, "推薦成功"), 
+      "推薦成功",
+      ifelse (str_detect(X5y$清結原因, "利用本部資訊就業"), 
+                         "利用本部資訊就業",
+      ifelse (str_detect(X5y$清結原因, "暫停就業"), 
+            "暫停就業",
+      ifelse (str_detect(X5y$清結原因, "改利用其他管道"), 
+        "改利用其他管道",
+      ifelse (str_detect(X5y$清結原因, "系統自動關閉"), 
+              "系統自動關閉",
+      ifelse (str_detect(X5y$清結原因, "尚具求職需求"), 
+                      "尚具求職需求",        
+      ifelse (str_detect(X5y$清結原因, "無法聯繫"), 
+                      "無法聯繫",    
+      ifelse (str_detect(X5y$清結原因, "自行就業"), 
+                      "自行就業",NA))))))))
+    X5y %>% count(清結原因1)
+    
+    
+  #年齡分組1
+    #青年18-29, #青壯年30-44, #中高齡45-64, #銀髮55以上, #高齡65以上
+    X5y$年齡分組1 <- ifelse (X5y$年齡<18, "少年< 18",
+      ifelse (X5y$年齡<30,"青年18-29",
+      ifelse (X5y$年齡<45,"青壯年30-44",
+      ifelse (X5y$年齡<65,"中高齡45-64",
+      ifelse (X5y$年齡>64,"高齡 >65",NA)))))
+    X5y %>% count(年齡分組1)
+    
+  # 年齡分組2  
+    #每5歲一級距， #15以下, #16-20, #21-25, #26-30, .....
+    X5y$年齡分組2 <- ifelse (X5y$年齡<=15, "<= 15",
+               ifelse (X5y$年齡<=20,"16-20",
+               ifelse (X5y$年齡<=25,"21-25",
+               ifelse (X5y$年齡<=30,"26-30",
+               ifelse (X5y$年齡<=35,"31-35",
+               ifelse (X5y$年齡<=40,"36-40",
+               ifelse (X5y$年齡<=45,"41-45",
+               ifelse (X5y$年齡<=50,"46-50",
+               ifelse (X5y$年齡<=55,"51-55",
+               ifelse (X5y$年齡<=60,"56-60",
+               ifelse (X5y$年齡<=65,"61-65",
+               ifelse (X5y$年齡>65,"> 65",NA))))))))))))
+    X5y %>% count(年齡分組2)
+    
+    
+    #障別
+    X5y %>% count(障別)
+    X5y$障別1 <- 
+      ifelse (str_detect(X5y$障別, "上肢體障礙者"), 
+            "上肢體障礙者",
+    ifelse (str_detect(X5y$障別, "下肢體障礙者"), 
+            "下肢體障礙者",
+    ifelse (str_detect(X5y$障別, "其他"), 
+            "其他",
+    ifelse (str_detect(X5y$障別, "多重障礙者"), 
+            "多重障礙者",
+    ifelse (str_detect(X5y$障別, "罕見疾病"), 
+            "罕見疾病致身心障礙者",
+    ifelse (str_detect(X5y$障別, "先天代謝異常"), 
+            "先天代謝異常",NA))))))
+
+    X5y$希望待遇  <- as.integer(X5y$希望待遇)
+    X5y$前次工作薪資 <- as.integer(X5y$前次工作薪資)
+    
+  
+    #刪除重複資料
+    X5y <- unique(X5y)
+    
+    
+    #save(X5y, file = "F:/提供主計處資料/X5y.RData") #162197筆
+    #write_xlsx(X5y,"F:/提供主計處資料/X5y.xlsx")    #162197筆
+
+求職人次 <- nrow(X5y)
+cat("5年求職人次(資料清理後):", 求職人次, "筆資料")
+
+```
+
+# 異常值處理
+```{r }
+    #load("F:/提供主計處資料/X5y.RData")  #162197筆
+
+    #姓名重複筆數與人次?
+    A <- X5y[!duplicated(X5y$求職人),] #總數162197筆，沒重複的筆數是133734筆
+    B <- X5y[duplicated(X5y$求職人),]  #重複筆數 28463 (會去掉自己1筆)
+    B1 <- B[!duplicated(B$求職人),]    #重複筆數中，使不重複後筆數14555人
+                                       #故X5y中，有28463+14555筆=43018重複
+    C <- B1 %>% select(求職人) %>%     # 實際上確實有43018筆重複
+      left_join(X5y,by="求職人")
+   
+    D <- C %>% arrange(求職人) %>% group_by(求職人) %>% #求職人重複服務次數
+      summarise(服務次數=n()) 
+    
+    E <- D %>% group_by(服務次數) %>% summarise(人次=n()) %>% 
+      mutate(prop=percent(人次/sum(人次),0.1)) # 服務次數的人數排比
+    ggplot(E, aes(x=服務次數, y=人次)) + geom_col()
+    
+    F <- E %>% filter(服務次數>10)     
+    ggplot(F,aes(x=服務次數, y=人次)) + geom_col()
+  #答案就是5年內有14555人重複服務(共43018筆紀錄)，服務次數排比如上
+    
+  #所以，
+    #1總資料表去掉重複者，用於分析求職者特性  133734筆-求職人檔
+    #2總資料表去掉重複者，用於分析服務能量    162197筆- X5y
+    
+    #求職人單獨檔
+    求職人檔 <- A
+
+    #服務多次名冊與人數
+    來2次以上求職人檔 <- C
+    cat("求職人最多接受服務次數: ",max(E$服務次數))
+    cat("來2次以上人數: ",nrow(來2次以上求職人檔))
+    
+    #資料筆數
+    求職人次 <- nrow(X5y)
+    求職人數 <- nrow(求職人檔)
+    #重複人次=求職人次-求職人數
+    cat("求職人次:", 求職人次, ";  ","求職人數:",求職人數,";")
+    cat("重複人次 = ",nrow(來2次以上求職人檔))
+    
+    
+    #(以下不必執行)
+    # 驗證資料唯一性與正確
+    # 姓名與身分證一致? 
+    #A <- 求職人檔 %>% group_by(求職人,身分證號碼) %>% 
+    #  filter(求職人==身分證號碼) 
+    #查證是否有重複姓名
+    #B1 <- 求職人檔 %>% group_by(求職人,身分證號碼) %>% 
+    #  filter(身分證號碼==A$身分證號碼[1])
+    #B2 <- X5y %>% group_by(求職人,身分證號碼) %>% 
+    #  filter(身分證號碼==A$身分證號碼[2])
+    #以上都是唯一，故保留，繼續往下執行
+
+    
+    # 年齡
+    # Density plot with mean lines and marginal rug
+    求職人檔 %>% ggplot(aes(x=年齡, y=as.factor(年),fill=年))+
+      geom_boxplot()
+    求職人檔 %>% ggplot(aes(y=年齡))+
+      geom_boxplot()
+    hist(求職人檔$年齡)
+    
+    #save(求職人檔, file = "F:/提供主計處資料/求職人檔.RData") #133734筆
+    #save(來2次以上求職人檔, file = "F:/提供主計處資料/來2次以上求職人檔.RData") #133734筆
+    #save(X5y, file = "F:/提供主計處資料/X5y.RData") #162197筆
+```    
+
+# 服務能量(求職人次與人數--因為1人可能來多次)
+
+```{r }
+  #3.1 服務能量(求職人次與人數--因為1人可能來多次)---------
+    #load("F:/提供主計處資料/X5y.RData")
+    
+    # 每日處理件數
+    datebreaks <- seq(as.Date("2019-01-01"), as.Date("2023-12-31"), 
+                      by = "3 month")
+    dailycase <- X5y %>% 
+      group_by(登記日期1,年,月,日,星期) %>% 
+      summarise(count=n()) 
+    # 計算日均與月總
+    d <- dailycase %>% group_by(年) %>% #計算日處理量
+      summarise(每年總量=sum(count), 日數=n()) %>%  
+      mutate(日平均量=round(每年總量/日數,0))
+    pc <- ggplot(dailycase, aes(x=登記日期1, y= count,fill=年)) +
+      geom_area(show.legend = F) + facet_grid(.~年, scales = "free_x")+   scale_x_date(breaks = datebreaks,date_labels = "%y/%m") +
+      theme(axis.text.x = element_text(angle = 30, hjust = 1))+
+      labs(title = "年度求職人次統計量圖", x="登記日期",y="求職人數", color="年")+
+      theme(legend.position = "top")+  #主題樣式與legend位置
+      theme(axis.text = element_text(face="bold",size = 10, angle = 0, vjust = 0.5, hjust = 0.5), #xy-axis label size..
+            axis.title = element_text(face="bold",size = 15,hjust = 0.5), #xy-axis title size
+            plot.title = element_text(face="bold",size = 18,hjust = 0.5),         plot.subtitle = element_text(face="bold",size = 14,hjust = 0.5,margin = margin(t = 20)), legend.title = element_text(color="black", size=15, face="bold", hjust = 1.0), 
+            legend.text = element_text(size=15))
+    # 加入平均值與線及文字
+    pc <- pc+ geom_hline(data = d, aes(yintercept = 日平均量),
+                         linetype = "dashed",size =1)+
+      # 每天平均處理量
+      geom_text(data = d, aes(y=313, x=ymd(c("2019/04/01","2020/04/01","2021/04/01","2022/04/01","2023/04/01")),
+      label = "日均量"),vjust =0, fontface="bold", size=4) +
+      geom_text(data = d, aes(y=320,x = ymd(c("2019/08/01","2020/08/01","2021/08/01","2022/08/01","2023/08/01")), label = 日平均量),hjust =0, fontface="bold", size=4,color="red") +
+      # 每月處理量
+      geom_text(data = d, aes(y=350,x =ymd(c("2019/04/01","2020/04/01","2021/04/01",                                     "2022/04/01","2023/04/01")), label = "年量"), vjust =0, fontface="bold", size=4)+
+      geom_text(data = d, aes(y=360,x = ymd(c("2019/08/01","2020/08/01","2021/08/01","2022/08/01","2023/08/01")), label = 每年總量), hjust =0, fontface="bold", size=4,color="red") 
+    
+    pc
+
+    # 每月處理件數
+    monthlycase <- dailycase %>% group_by(年,月) %>% 
+      summarise(count=sum(count),月處理日數=n())
+    #計算月處理量
+    m <- monthlycase %>% group_by(年) %>% 
+      summarise(每年總量=sum(count), 月數=n()) %>%
+      mutate(月平均量=round(每年總量/月數,0))
+    
+    pd <- ggplot(monthlycase, aes(x=月, y= count, fill=年)) +
+      geom_col(position = "dodge",show.legend = F)+
+      theme(axis.text.x = element_text(angle = 30, hjust = 1))+
+      labs(title = "每月求職人次統計量圖", x="申請月份",y="求職人數")+
+      facet_grid(.~年)+
+      scale_x_discrete(limits = c("1", "2", "3","4","5","6","7","8","9","10","11","12"))+
+      theme(axis.text = element_text(face="bold",size = 10, angle = 0, vjust = 0.5, hjust = 0.5), #xy-axis label size..
+            axis.title = element_text(face="bold",size = 15,hjust = 0.5), #xy-axis title size
+            plot.title = element_text(face="bold",size = 18,hjust = 0.5), # 標題大小
+            plot.subtitle = element_text(face="bold",size = 14,hjust = 0.5,margin = margin(t = 20))) # 標題大小
+    
+    pd <- pd+ geom_hline(data=m,aes(yintercept = 月平均量),linetype = "dashed",size =1, color="black" )+
+      geom_text(data=m, aes(x=9,y = 4500,label = 月平均量), 
+                vjust =-1, fontface="bold", size=4,color="red")+ # 加上數字標籤
+      geom_text(data=m, aes(x=1,y = 4400,label = "月均量"), 
+                vjust =-1.5,hjust=0, fontface="bold", size=4) # 加上數字標籤
+    pd
+    #plot_grid(pd, labels=c("圖 D"))
+    
+    # 每年處理件數(可略)
+    yearlycase <- monthlycase %>% group_by(年) %>% 
+      summarise(count=sum(count)) 
+    pe <- ggplot(yearlycase, aes(x=年, y= count, fill=年)) +
+      geom_col(position = "dodge",width = 0.5, show.legend = F, alpha=0.7)+
+      #theme(axis.text.x = element_text(angle = 30, hjust = 1))+
+      labs(title = "每年服務求職人次", x="年",y="求職人次")+
+      theme(axis.text = element_text(face="bold",size = 10, angle = 0, vjust = 0.5, hjust = 0.5), #xy-axis label size..
+            axis.title = element_text(face="bold",size = 15,hjust = 0.5), #xy-axis title size
+            plot.title = element_text(face="bold",size = 18,hjust = 0.5), # 標題大小
+            plot.subtitle = element_text(face="bold",size = 14,hjust = 0.5,margin = margin(t = 20)))# 標題大小
+
+    pe <- pe + geom_text(aes(label = count), vjust = 1.5, 
+                         fontface="bold",size=4,color="red") # 加上數字標籤
+    pe
+ 
+#save(X5y, file = "F:/提供主計處資料/X5y.RData") #162197筆
+```  
+
+# 求職人特質(含因素分析)
+
+```{r }
+    #load("F:/提供主計處資料/X5y.RData")
+    #load("F:/提供主計處資料/求職人檔.RData")
+    求職人資料 <- 求職人檔
+    
+  #3.3.1 年齡分布
+   # boxplot and test
+    p1 <- ggboxplot(求職人資料, x = "年", y = "年齡",
+                   color = "年")
+    my_comparisons <- list( c("2019", "2020"), c("2021", "2022"), c("2022", "2023") )
+    p1 + stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons p-value
+      stat_compare_means(label.y = 130)                   # Add global p-value
+
+    # Density plot with mean lines and marginal rug
+    hist(求職人資料$年齡)
+    max(求職人資料$年齡, na.rm = T)
+    
+     #年齡分組A
+    X5y$年齡分組1 <- factor(X5y$年齡分組1, levels=c("少年< 18","青年18-29",
+                                            "青壯年30-44","中高齡45-64","高齡 >65"))
+    
+    library(ggstats)
+    X5y %>% filter(!is.na(年齡分組1))%>%
+      ggplot(aes(年齡分組1, fill = 年齡分組1)) + 
+      geom_bar() +
+      geom_text(stat = "count", aes(label = after_stat(count)), 
+                vjust=-0.5, position=position_dodge(width=1), 
+                size=3) +  xlab("年齡分組") +ylab("人數") +
+      geom_text(stat = "prop", aes(label = percent(after_stat(prop),0.1)), 
+                vjust=2, position=position_dodge(width=1), 
+                size=3,color="darkred") +  
+      xlab("年齡分組") +ylab("人數") +
+      ggtitle("求職人年齡分組1")
+    
+    #年齡分組B
+    X5y$年齡分組2 <- factor(X5y$年齡分組2, 
+                        levels=c("<= 15","16-20","21-25","26-30","31-35","36-40",
+                                 "41-45","46-50","51-55","56-60","61-65","> 65"))
+    
+    X5y %>% filter(!is.na(年齡分組2))%>%
+      ggplot(aes(年齡分組2, fill = 年齡分組2)) + 
+      geom_bar() +
+      geom_text(stat = "count", aes(label = after_stat(count)), 
+                vjust=-0.5, position=position_dodge(width=1), 
+                size=3) +  xlab("年齡分組") +ylab("人數") +
+      geom_text(stat = "prop", aes(label = percent(after_stat(prop),0.1)), 
+                vjust=2, position=position_dodge(width=1), 
+                size=3,color="darkred") +  
+      xlab("年齡分組") +ylab("人數") +
+      ggtitle("求職人年齡分組2")
+
+
+    # 3.3.2 障別
+    障別 <- 求職人資料 %>% group_by(障別1) %>% 
+      filter(!is.na(障別1))%>%
+      summarise(count=n())
+    
+    障別$障別1 <- factor(障別$障別1, 
+        levels=c("上肢體障礙者","下肢體障礙者","多重障礙者",
+                 "罕見疾病致身心障礙者","先天代謝異常","其他"))
+    
+    ggbarplot(障別, x = "障別1", y = "count", label = T, 
+              label.pos = "in", width = 0.8,position = position_dodge(1),
+              fill = "障別1",color = "white",legend="none",
+              palette = "jco", x.text.angle = 30,ylim = c(0, 200) ) 
+
+    
+    #教育程度
+    求職人資料 %>% count(教育程度)
+    教育程度 <- 求職人資料 %>% group_by(教育程度) %>% 
+                                summarise(count=n())
+ 
+    教育程度$教育程度 <- factor(教育程度$教育程度, 
+         levels=c("國小","國中","高職","高中","專科","大學",
+                  "碩士","博士","其他"))
+    
+    ggbarplot(教育程度, x = "教育程度", y = "count", label = T, 
+              label.pos = "in", width = 0.8,position = position_dodge(1),
+              fill = "教育程度",color = "white",legend="none",
+              palette = "jco", x.text.angle = 30 )    
+    
+    #語言能力
+    求職人資料 %>% count(英文語言能力)
+    求職人資料 %>% count(日文語言能力)
+    語言能力1 <- 求職人資料 %>% group_by(英文語言能力) %>% 
+      summarise(英文=n()) %>% rename(語言能力=英文語言能力)
+    語言能力2 <- 求職人資料 %>% group_by(日文語言能力) %>% 
+      summarise(日文=n())%>% rename(語言能力=日文語言能力)
+    語言能力=cbind(語言能力1,語言能力2[,2])
+    ggbarplot(語言能力, x = "語言能力", y = "英文", label = T, 
+              label.pos = "in", width = 0.5,position = position_dodge(0.9),
+              fill = "語言能力",color = "white",legend="none",
+              palette = "jco", x.text.angle = 30 )   
+    ggbarplot(語言能力, x = "語言能力", y = "日文", label = T, 
+              label.pos = "in", width = 0.5,position = position_dodge(0.9),
+              fill = "語言能力",color = "white",legend="none",
+              palette = "jco", x.text.angle = 30 )   
+    
+    # 個案區分
+    個案區分 <- 求職人資料 %>% select(年,個案區分1,個案區分2,個案區分3,
+                             個案區分4,個案區分5,個案區分6,個案區分7)
+    A <- pivot_longer(個案區分, cols=starts_with("個案區分"),
+                   names_to = "個案",  
+                 values_to = "區分", values_drop_na = FALSE) 
+    A$區分 <- trimws(A$區分, which = c("both", "left", "right"))
+    #分割個案區分
+    A$區分碼 <- str_split_i(A$區分,"-",1)
+    A$區分名 <- str_split_i(A$區分,"-",2)
+    A <- A %>% select(-2,-3)
+    #A <- A %>% select(區分名) %>% 
+    #A1 <- A %>% count(區分名) %>% arrange(desc(n))
+    A1 <- A %>% count(年,區分名) %>% arrange(desc(n))
+    
+    年_個案區分 <- pivot_wider(A1, names_from = 年,
+                      values_from = n) %>%
+      select(區分名,"2019","2020","2021","2022","2023")
+    
+    # 用table來呈現 
+    A %>% select(區分名) %>%
+      tbl_summary(label=區分名~"個案身分名稱",
+      sort = list(區分名 ~ "frequency"))
+    
+    年_個案區分
+    C <- head(年_個案區分,30)
+    
+    #計算比例
+    C <- A %>% filter(年=="2023") %>%
+      count(區分名) %>% 
+      mutate(prop = percent(round(n/sum(n),3))) %>% 
+      arrange(desc(n))
+    
+    # 用table來呈現 
+    C %>% 
+      kbl(caption = "個案區分統計一覽表") %>%
+      kable_classic(full_width = FALSE, html_font = "Cambria")
+
+    #graph
+    D <- A1 %>% filter(年=="2023" & !is.na(區分名)) %>% head(30)
+    ggbarplot(D, x = "區分名", y = "n",  
+              fill = "區分名",            # change fill color by cyl
+              color = "white",            # Set bar border colors to white
+              #palette = "jco",            # jco journal color palett. see ?ggpar
+              x.text.angle = 30 ,         # Rotate vertically x axis texts
+              show.legend = FALSE)+
+              theme(legend.position = "none")+
+        theme(axis.text = element_text(face="bold",size = 5)) #xy-axis label size..
+        # 待加上額外文字    
+
+    
+
+    
+    
+    # 清結原因
+    求職人資料 %>% count(清結原因1)
+    清結原因 <- 求職人資料 %>% group_by(年,清結原因1) %>% 
+      summarise(count=n())
+    
+    清結原因$清結原因1 <- factor(清結原因$清結原因1, 
+                        levels=c("推薦成功","利用本部資訊就業",
+                                 "自行就業","改利用其他管道","暫停就業",
+                                 "無法聯繫","系統自動關閉","尚具求職需求",
+                                 NA))
+    
+    D <- 清結原因 %>% filter(年=="2023" & !is.na(清結原因1))
+    ggbarplot(D, x = "清結原因1", y = "count", label = T, 
+              label.pos = "in", width = 0.5,position = position_dodge(0.9),
+              fill = "年",color = "white",ylim=c(0,18000),
+              palette = "jco", x.text.angle = 30 )    
+    
+    
+    #兵役
+    A <- 求職人資料 %>% group_by(年,兵役) %>%
+      summarise(count=(n())) %>%
+      mutate(prop = percent(round(count/sum(count),3))) 
+    
+    p <- ggplot(A, aes(兵役, count, label = prop,fill=兵役))+ 
+            labs(x = NULL, y = NULL) # Hide axis label
+      p + geom_bar(stat = "identity") + ggtitle("兵役狀態")+
+        geom_text(aes(label = prop),vjust="outward")+
+        facet_wrap(.~年)
+    
+    
+    # 希望待遇與前次工資
+    求職人資料$希望待遇  <- as.integer(求職人資料$希望待遇)
+    求職人資料$前次工作薪資 <- as.integer(求職人資料$前次工作薪資)
+    
+    B <- 求職人資料 %>% select(年,教育程度,希望待遇,前次工作薪資,
+                          年齡分組1,清結原因1)
+    B$希望待遇 <- ifelse(B$希望待遇!=0,B$希望待遇,NA)
+    B$前次工作薪資 <- ifelse(B$前次工作薪資!=0,B$前次工作薪資,NA)
+    
+    ggplot(B, aes(x=教育程度, y=希望待遇))+ 
+      geom_boxplot(outliers = FALSE,na.rm = TRUE) +
+      stat_summary(fun=mean, geom="point", shape=5, size=3)+
+      stat_summary(aes(label=round(..y..,0)), fun.y=mean, geom="text", size=3,
+                 vjust = -0.5)
+
+    # 薪資落差
+    C <- na.omit(B)  #去掉NA，使可以比較薪資差異
+    薪資落差 <- C %>% mutate(薪資差異=希望待遇-前次工作薪資)
+    #找出異常值
+    out.薪資差異 <- boxplot.stats(薪資落差$薪資差異)$out
+    out_ind <- which(薪資落差$薪資差異 %in% c(out.薪資差異))
+    D<- 薪資落差[-out_ind, ]
+    
+    ggplot(D, aes(x=教育程度, y=薪資差異))+ 
+      geom_boxplot(outliers = T) +
+      stat_summary(fun=mean, geom="point", shape=5, size=3)+
+      stat_summary(aes(label=round(..y..,0)), fun.y=mean, geom="text", size=3,
+                   vjust = -0.5)
+    
+    #工作地點與居住行政區
+    #居住地點分布
+    F <- 求職人資料 %>% select(年,居住行政區) %>%
+      filter(str_detect(居住行政區, "市")|str_detect(居住行政區, "縣"))
+    
+    F$居住市 <- str_sub(F$居住行政區,1,2)
+    
+    #居住市來源
+    G1 <- F %>% group_by(居住市) %>%
+      summarise(人數=n()) %>% arrange(desc(人數)) %>%
+      mutate(prop = round(人數/sum(人數),3)) %>%
+      filter(prop>0.001) 
+    
+    G1$居住市
+    #年齡分組A
+    G1$居住市<- factor(G1$居住市, 
+        levels=c("高雄","屏東","台南","嘉義","雲林","彰化",
+                 "台中","新竹","新北", "桃園","台北", "台東"))
+    
+      ggplot(G1,aes(x=居住市,y = 人數,fill = 居住市)) + 
+      geom_col(,show.legend = FALSE) +
+      geom_text(aes(label = 人數), 
+                vjust=-0.5, position=position_dodge(width=1), 
+                size=3) +  xlab("居住城市") +ylab("人數") +
+         ggtitle("求職人員居住城市統計一覽表")
+    
+    
+    F <- F %>% filter(居住市=="高雄")
+    F$居住區 <-str_split_i(F$居住行政區,"市",2)
+    
+    G2 <- F %>% group_by(居住區) %>%
+      summarise(人數=n()) %>% arrange(desc(人數)) %>%
+      mutate(prop = round(人數/sum(人數),3)) %>%
+      filter(prop>0.001)
+    
+    G2 <- head(G2,10)
+    G2$居住區<- factor(G2$居住區, 
+          levels=c("鳳山區", "三民區", "楠梓區", "左營區", "前鎮區" ,
+                   "苓雅區", "小港區", "大寮區", "鼓山區","岡山區"))
+
+    ggplot(G2,aes(x=居住區,y = 人數,fill = 居住區)) + 
+      geom_col(show.legend = FALSE) +
+      geom_text(aes(label = 人數), 
+                vjust=-0.5, position=position_dodge(width=1), 
+                size=3,color="darkred") +  xlab("居住城市") +ylab("人數") +
+      geom_text(aes(label = percent(prop,0.1)), 
+                  vjust=2, position=position_dodge(width=1), 
+                  size=3) +  
+      ggtitle("求職人員高雄市居住區域統計一覽表")
+    
+    
+      
+``` 
+
+
