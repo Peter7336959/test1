@@ -1,0 +1,19 @@
+project:
+  type: book
+
+book:
+  title: "事故調查制度實務指南"
+  author: "謝賢書，何明信"
+  date: "2025/5/01"
+  chapters:
+    - index.qmd
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+  pdf:
+    documentclass: scrreprt
+
