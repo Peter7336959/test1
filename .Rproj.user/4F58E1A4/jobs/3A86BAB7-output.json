@@ -1,0 +1,6 @@
+[1,"==> quarto preview index.qmd --to html --no-watch-inputs --no-browse\n\n"]
+[1,"pandoc \n  to: html\n  output-file: index.html\n  standalone: true\n  toc: true\n  number-sections: false\n  title-prefix: 事故調查制度實務指南\n  section-divs: true\n  html-math-method: mathjax\n  wrap: none\n  default-image-extension: png\n  \nmetadata\n  crossref:\n    chapters: true\n  document-css: false\n  link-citations: true\n  date-format: long\n  lang: en\n  bibliography:\n    - references.bib\n  theme:\n    - cosmo\n    - brand\n  editor:\n    markdown:\n      wrap: 72\n  title: 事故調查制度實務指南\n  author: 謝賢書，何明信\n  date: 2025/5/01\n  \n"]
+[1,"Output created: _book\\index.html\n\n"]
+[1,"Preparing to preview\n"]
+[1,"\nWatching files for changes\nBrowse at http://localhost:3429/\n"]
+[1,"GET: /\n"]
