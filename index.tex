@@ -1,0 +1,397 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrreprt}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
+\@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
+\definecolor{quarto-callout-color}{HTML}{909090}
+\definecolor{quarto-callout-note-color}{HTML}{0758E5}
+\definecolor{quarto-callout-important-color}{HTML}{CC1914}
+\definecolor{quarto-callout-warning-color}{HTML}{EB9113}
+\definecolor{quarto-callout-tip-color}{HTML}{00A047}
+\definecolor{quarto-callout-caution-color}{HTML}{FC5300}
+\definecolor{quarto-callout-color-frame}{HTML}{acacac}
+\definecolor{quarto-callout-note-color-frame}{HTML}{4582ec}
+\definecolor{quarto-callout-important-color-frame}{HTML}{d9534f}
+\definecolor{quarto-callout-warning-color-frame}{HTML}{f0ad4e}
+\definecolor{quarto-callout-tip-color-frame}{HTML}{02b875}
+\definecolor{quarto-callout-caution-color-frame}{HTML}{fd7e14}
+\makeatother
+\makeatletter
+\@ifpackageloaded{bookmark}{}{\usepackage{bookmark}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={事故調查制度實務指南},
+  pdfauthor={謝賢書，何明信},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{事故調查制度實務指南}
+\author{謝賢書，何明信}
+\date{2025-05-01}
+
+\begin{document}
+\maketitle
+
+\renewcommand*\contentsname{Table of contents}
+{
+\hypersetup{linkcolor=}
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+
+\bookmarksetup{startatroot}
+
+\chapter*{摘要}\label{ux6458ux8981}
+\addcontentsline{toc}{chapter}{摘要}
+
+\markboth{摘要}{摘要}
+
+\pandocbounded{\includegraphics[keepaspectratio]{指引封面.jpg}}
+
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, breakable, opacitybacktitle=0.6, bottomrule=.15mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, leftrule=.75mm, toprule=.15mm, left=2mm, colback=white, bottomtitle=1mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, rightrule=.15mm, arc=.35mm, coltitle=black]
+
+請留意，這是一份網路版草稿，內容以經正式審查編印後為準。 This is a
+Quarto book about Occupational Accident investigation.
+
+\end{tcolorbox}
+
+本「事故調查制度實務指南」旨在為提升我國職業災害事故調查品質，提供事業單位及職業安全衛生專業人員一套系統化且實用的參考架構與指引，以協助業者有效預防事故發生(或再次發生)。本指南強調事故調查的分析功能與實務，其不僅是法律合規與社會責任的展現，更是整合職業安全衛生管理循環(如TOSHMS)的核心樞紐之一，並能催化安全文化的塑造。
+
+事故調查的角色定位已從「事後究責」轉變為「風險治理」的概念，為了使事故調查更具系統與完整性，本指南參考國內外指引，介紹了多種事故因果模型，從簡單線性到複雜非線性模型，說明理解事故因果模式有助於建立有效的系統性事故預防方法。描述了事故調查的主要流程，提供查檢表供調查人員自我檢核，已完成系統性調查。詳細展示先進國家常用之系統調查分析方法，包括事故成因分析(ECFA)與事故成因圖(ECFC)、時間序列表、為何樹分析(Why
+Tree)、屏障分析(BA)、變更分析(CA)以及根本原因分析(RCA)。這些分析方法各有其目的與功能，藉由個案示範，事故調查人員可依據事故特性與企業需求，選擇合適的方法，以深入探究事故的直接原因、潛在原因與根本原因。而其中，根本原因分析可以找出管理階層有能力修正的深層原因，避免未來發生類似事件。
+
+本指南亦涵蓋職安衛專業人員在事故調查中應具備的專業技能與提醒，包含資料收集技術(如證據蒐集與人員訪談技巧)、對策發展思維與調查報告建議等。透過這些專業技能的運用，能確保事故調查的有效性和深度。期待透過本指南的專業且便利之參考內容，提供業者建立符合自身事故調查制度(含虛驚、職災、與影響身心事件等)，積極防止職災事故發生，確保企業永續經營，與保護工作者安全健康。
+
+關鍵字：事故調查，事故因果模型，事故成因分析(ECFA)，屏障分析(BA)，根本原因分析(RCA)
+
+\bookmarksetup{startatroot}
+
+\chapter*{緣起}\label{ux7de3ux8d77}
+\addcontentsline{toc}{chapter}{緣起}
+
+\markboth{緣起}{緣起}
+
+以管理循環PDCA的架構與精神而論，職業災害的預防首重在危害辨識，接著規劃相關的預防活動，確實執行這些活動，這是PD的部分。當發生意外事故時，表示上述的預防活動出了問題。可能是預防工作的規劃不足，也可能是執行出了問題。順著意外事故的發生，找出立即原因，順藤摸瓜，運用適當事故調查分析方法與工具，終究會找出根本原因。若能對症下藥，提出有效的改善措施，精進安全管理系統，長期下來，危害會減少，職災率也會逐漸下降，充分發揮PDCA的精神與功效。國內的職災率的確逐漸下降中。實務上，實務上與官方勞檢同仁的普遍經驗與印象，當發生職災時，事業單位不太會調查與分析事故，更遑論提出有效的改善建議。
+
+作者的經驗中，有一事業單位每年都有十餘件生產部門的幹部維修機台而受傷，該單位一直禁止生產部門的幹部擅自維修故障的機台。不管如何的三申五令，歷年來，總是無法減少類似事故發生。該單位經過輔導，方發現幹度違反規定維修機台的根本因素是故障機台若沒有盡快修復，會影響其生產績效的成果，也就是影響其部門的績效獎金。為杜絕類似情事的發生，後來修改生產績效的計算方式，將故障機台停機時間不計入生產時間，幹部因此沒有讓故障機台趕快加入產線的動機，此類事故也就自然消除。值此之故，若能協助事業單位強化事故調查的能力，讓事業單位如同上例般地從根本改善其安全管理制度的盲點，相信對國內危害消除與職災率的改善會有相當大的助力。
+
+考量目前大部份的事業單位欠缺具足夠經驗與能力的事故調查專業人才，一份嚴謹的事故調查制度實務指南應是業界所需。財團法人職業災害預防與重建中心(簡稱預防中心)提出發展本指南方案，業界裡的安衛專責人員或部門主管可以藉著這份指南，自我學習與經驗累積。本指南的編撰參考國內外的事故調查實務指引文獻，以深入淺出的方式，輔以案例的說明。期待自學者可以憑指南裡詳盡的說明，以事業單位的案例自行套用，多次練習，事故調查的能力自然會日積月累地提升。當功力成熟，從職災案例調查到虛驚事件的調查，必然會從根本原因的辨識中，提出有效改善管理制度的措施，強化安全衛生管理的體質。
+
+但在實務上，培養出成熟的事故調查人員需要足夠時間的學習與相當數量案例的分析磨練。對有些事業單位而言，可能緩不濟急，本計畫執行團隊在本指南裡，針對事故調查方法，提供檢核表說明與事故調查程序，藉由原因分析方法展開的步驟與過程，讓有立即需要運用者，可以不用閱讀整本指南，而直接參閱套用。對於初學者，事故調查出來的結果或許不盡完整，但或許可以達到5成的成效，比起束手無策，輕率提出無效的改善方式，多少可以搔到癢處，縱然無法全面，也可以改善部分的安衛管理制度或執行措施。
+
+這是預防中心在事故調查領域的第一年計畫，不管是本實務指南、推廣方式或力道仍有繼續精進的空間。希望此計畫的推動，藉著中心的網路平台，喚醒業界對事故調查的重視，培育業界相關人士的事故調查能力，持之以恆，我們期待有心照顧員工的事業單位可以借助本指南，在PDCA架構中，持續改善安衛管理，達到零職災的終極目標。
+
+\bookmarksetup{startatroot}
+
+\chapter*{目錄}\label{ux76eeux9304}
+\addcontentsline{toc}{chapter}{目錄}
+
+\markboth{目錄}{目錄}
+
+一. 前言\\
+二. 事故調查角色定位 三. 事故調查定義與術語\\
+四. 好的事故調查構成要素\\
+五. 事故因果模型\\
+六. 事故調查流程與查檢表\\
+七. 事故調查專業技術\\
+八. 事故調查分析工具\\
+九. 結論\\
+十. 建議進階閱讀書目\\
+十一. 附錄\\
+十二. 參考文獻
+
+\section*{一. 前言}\label{ux4e00.-ux524dux8a00}
+\addcontentsline{toc}{section}{一. 前言}
+
+\markright{一. 前言}
+
+職業災害事故調查是職業安全衛生管理的基本要素，也是許多全能職業安全衛生專業人員(以下簡稱職安衛人員)的核心職能。事故調查過分強調分析個人的行為，而沒有對導致這些錯誤的潛在系統因素進行充分分析，會導致事故再發。為提高職安衛人員的事故調查能力，本指南說明事故的因果關係模型、調查流程、常用技術與分析工具以及局限性，並概述了矯正措施(改善建議)的制定和調查報告製作，供職安衛人員與工作現場主管從事事故調查的參考，主要目標應該是透過有效調查供企業持續學習，以預防事故再發。
+企業在道德和財務上都迫切需要尋找有效的職業安全衛生解決方案，來防止與工作相關的事故。根據澳大利亞安全工作局2012-13年度估計，職業災害(以下幾稱職災)事故經濟成本負擔佔全國GDP
+4.1\%\textasciitilde5\%
+(618億澳幣)，估計其中雇主負擔5\%，社會負擔18\%，而勞工負擔77\%
+{[}1{]}。美國OSHA的報告指出，職災事故病對財務和社會影響是巨大的，這些傷害和疾病的工人及其家人和納稅人支付了大部分經濟成本。在2012年美國職災事故經濟成本為1980億美金，職災勞工難以獲得他們應得的工資損失和醫療費用，加上社會損失成本轉移，職災補償金僅涵蓋職災造成的工資損失和醫療費用的一小部分(也就是雇主負擔約
+21\%），勞工及其家人和他們的私人健康保險支付了近 63\% 的費用，剩下的
+16\% 由納稅人承擔(社會保險機制)
+{[}2{]}。而英國HSE根據其職災成本模式估計，其2022-2023年度統計顯示，職災總成本為216億英鎊，職業相關疾病造成的總成本約67\%比例最大，職業傷害約為33\%；勞工承擔了58\%的最大損失，政府承擔23\%、而雇主僅負擔19\%
+{[}3{]}。
+這些官方報告都顯示出罹災勞工及其家庭承擔了大部分的經濟損失負擔，而政府則又替高風險或輕率、或不負責任雇主負擔了其應損失的成本。當然，並非所有與事件相關的成本都是財務成本，職災罹災者及其家人的後果可能包括失去親人、長期病痛和喪失工作能力、謀生能力下降等。這些統計數據強調了確保在事故發生後進行嚴謹和有效調查的必要性，以最大限度地吸取經驗教訓，防止類似事故再度發生，加上有效地的職災預防策略，將可減少對工人及其家庭、社區和社會的影響。
+
+\section*{二.
+事故調查角色定位}\label{ux4e8c.-ux4e8bux6545ux8abfux67e5ux89d2ux8272ux5b9aux4f4d}
+\addcontentsline{toc}{section}{二. 事故調查角色定位}
+
+\markright{二. 事故調查角色定位}
+
+本章探討職業災害事故調查(以下簡稱事故調查)的功能與重要性，結合職業安全衛生管理系統(以下簡稱管理系統)，法律規範、及職業安全衛生專業人員(以下簡稱職安衛人員)職能等，闡明其在創造安全工作環境中的組織、個人與社會層級的專業價值。
+
+\section*{三.
+事故調查定義與術語}\label{ux4e09.-ux4e8bux6545ux8abfux67e5ux5b9aux7fa9ux8207ux8853ux8a9e}
+\addcontentsline{toc}{section}{三. 事故調查定義與術語}
+
+\markright{三. 事故調查定義與術語}
+
+\section*{四.
+好的事故調查構成要素(基本準則)}\label{ux56db.-ux597dux7684ux4e8bux6545ux8abfux67e5ux69cbux6210ux8981ux7d20ux57faux672cux6e96ux5247}
+\addcontentsline{toc}{section}{四. 好的事故調查構成要素(基本準則)}
+
+\markright{四. 好的事故調查構成要素(基本準則)}
+
+\section*{五.
+事故因果模型}\label{ux4e94.-ux4e8bux6545ux56e0ux679cux6a21ux578b}
+\addcontentsline{toc}{section}{五. 事故因果模型}
+
+\markright{五. 事故因果模型}
+
+\section*{六.
+事故調查流程與查檢表}\label{ux516d.-ux4e8bux6545ux8abfux67e5ux6d41ux7a0bux8207ux67e5ux6aa2ux8868}
+\addcontentsline{toc}{section}{六. 事故調查流程與查檢表}
+
+\markright{六. 事故調查流程與查檢表}
+
+\section*{七.
+事故調查專業技術}\label{ux4e03.-ux4e8bux6545ux8abfux67e5ux5c08ux696dux6280ux8853}
+\addcontentsline{toc}{section}{七. 事故調查專業技術}
+
+\markright{七. 事故調查專業技術}
+
+\section*{八.
+事故調查分析工具}\label{ux516b.-ux4e8bux6545ux8abfux67e5ux5206ux6790ux5de5ux5177}
+\addcontentsline{toc}{section}{八. 事故調查分析工具}
+
+\markright{八. 事故調查分析工具}
+
+\section*{九. 結論}\label{ux4e5d.-ux7d50ux8ad6}
+\addcontentsline{toc}{section}{九. 結論}
+
+\markright{九. 結論}
+
+\section*{十.
+建議進階閱讀書目}\label{ux5341.-ux5efaux8b70ux9032ux968eux95b1ux8b80ux66f8ux76ee}
+\addcontentsline{toc}{section}{十. 建議進階閱讀書目}
+
+\markright{十. 建議進階閱讀書目}
+
+\section*{十一. 附錄}\label{ux5341ux4e00.-ux9644ux9304}
+\addcontentsline{toc}{section}{十一. 附錄}
+
+\markright{十一. 附錄}
+
+\section*{十二. 參考文獻}\label{ux5341ux4e8c.-ux53c3ux8003ux6587ux737b}
+\addcontentsline{toc}{section}{十二. 參考文獻}
+
+\markright{十二. 參考文獻}
+
+\subsection*{以下為書本編制格式範例，參考用，最後會移除。}\label{ux4ee5ux4e0bux70baux66f8ux672cux7de8ux5236ux683cux5f0fux7bc4ux4f8bux53c3ux8003ux7528ux6700ux5f8cux6703ux79fbux9664}
+\addcontentsline{toc}{subsection}{以下為書本編制格式範例，參考用，最後會移除。}
+
+\subsection*{參考國內外指引}\label{ux53c3ux8003ux570bux5167ux5916ux6307ux5f15}
+\addcontentsline{toc}{subsection}{參考國內外指引}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1972}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1972}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.4085}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1972}}@{}}
+\caption{表一 國內外參考指引 \{.striped .hover\} HSE \& US
+OSHA}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+No
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+機構
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+指引名稱
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+年份
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+No
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+機構
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+指引名稱
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+年份
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 美國OSHA & Incident {[}Accident{]} Investigations & 2015 \\
+2 & 英國HSE & Investigating accidents and incidents (HSG245) & 2004 \\
+3 & ILO & A practical guide for labor inspectors: Investigation of
+occupational accidents and diseases & 2015 \\
+8 & 台灣IOSH & 事故調查方法應用研究 & 2000 \\
+\end{longtable}
+
+\subsection*{五、調查流程}\label{ux4e94ux8abfux67e5ux6d41ux7a0b}
+\addcontentsline{toc}{subsection}{五、調查流程}
+
+Diagrams
+
+\includegraphics[width=6.81in,height=2.35in]{index_files/figure-latex/mermaid-figure-1.png}
+
+Authoring There are a variety of tools available to improve your
+productivity authoring diagrams:
+
+The \href{https://mermaid.live/}{Mermaid Live Editor} is an online tool
+for editing and previewing Mermaid diagrams in real time.
+
+\href{https://dreampuf.github.io/GraphvizOnline/}{Graphviz Online}
+provides a similar tool for editing Graphviz diagrams.
+
+Videos \url{https://www.youtube.com/watch?v=uqPk_59c3Dw}
+
+
+
+
+\end{document}
