@@ -1,7 +1,0 @@
----
-title: "references"
-editor: visual
----
-
-::: {#refs}
-:::
